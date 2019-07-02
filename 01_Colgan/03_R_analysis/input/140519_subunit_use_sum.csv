@@ -1,0 +1,7 @@
+﻿Treatment,Caste,alpha1,alpha2,alpha3,alpha4,alpha5,alpha6,alpha7,alpha8,alpha9/beta2,beta1
+control,worker,239,2501,564,912,1012,57,113,938,490,1126
+control,queen,328,1518,1089,1260,665,186,778,596,469,1028
+clo,worker,,,,,,,,,,
+clo,queen,,,,,,,,,,
+imi,worker,,,,,,,,,,
+imi,queen,,,,,,,,,,
