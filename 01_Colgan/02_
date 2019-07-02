@@ -1,0 +1,86 @@
+#copy files from Joe's directory to scratch
+cp /data/home/btw928/scratch_link/2019-05-20_bams_for_val/workers/
+scratch/workers
+cp /data/home/btw928/scratch_link/2019-05-20_bams_for_val/queens
+scratch/queens
+
+#unzip files
+@scratch/workers/
+gunzip *.gz
+@scratch/queens/
+gunzip *.gz
+
+#load correct version of python for HTSeq
+module load python/2.7.15
+
+#create virtualenv
+virtualenv --include-lib htseq3
+
+#load virtualenv for analysis
+source htseq3/bin/activate
+
+#install correct/compatible HTseq version of python version
+pip install HTSeq==0.6.0
+
+#check correct python version is still loaded
+module load python/2.7.15
+
+#soft link to dexseq scripts used for annotation of flattenedfile used for
+exon counting @htseq folder
+ln -s /data2/scratch/btw586/DEXSeq_1.26.0 .
+
+#use python scripts to annotate file
+ python ./DEXSeq_1.26.0/inst/python_scripts/dexseq_prepare_annotation.py
+./Bombus_terrestris.Bter_1.0.40.gtf ./Bombus_terrestris.Bter_1.0.40.gtf.gff
+
+#create bam_sam.sh file
+#exon counting default is used sith sam files so use samtools to convert
+bams to sam
+module load nano
+nano bam_sam.sh
+###job script ####
+#!/bin/bash
+#$ -cwd
+#$ -pe smp 4
+#$ -l h_rt=2:0:0
+#$ -l h_vmem=4G
+
+module load samtools
+source htseq3/bin/activate
+module load samtools
+
+for f in scratch/queens/*.bam; do samtools view -h -o $f.sam $f; done
+
+for f in scratch/workers/*.bam; do samtools view -h -o $f.sam $f; done
+
+########
+
+#submit job
+qsub bam_sam.sh
+
+#new job script for exon counting
+nano counting_exons.sh
+###job script ###
+#!/bin/bash
+#$ -cwd
+#$ -pe smp 4
+#$ -l h_rt=2:0:0
+#$ -l h_vmem=4G
+
+module load parallel
+module load python/2.7.15
+source htseq3/bin/activate
+ls scratch/queens/*.sam | parallel -v python
+DEXSeq_1.26.0/inst/python_scripts/dexseq_count.py -s reverse
+Bombus_terrestris.Bter_1.0.40.gtf.gff {} {}.counts
+
+ls scratch/workers/*.sam | parallel -v python
+DEXSeq_1.26.0/inst/python_scripts/dexseq_count.py -s reverse
+Bombus_terrestris.Bter_1.0.40.gtf.gff {} {}.counts
+
+
+#########
+
+#qsub job
+qsub counting_exons.s#move results into results directory
+mv ./scratch/queens/*sam ../../resultsh
