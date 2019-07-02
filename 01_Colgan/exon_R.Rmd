@@ -1,0 +1,295 @@
+---
+title: "Control B. terrestris"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r}
+rm( list = ls () )
+```
+
+
+```{r}
+setwd("/../../../../02_dexseq_visualisation")
+```
+
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',
+                      echo=FALSE, warning=FALSE, message=FALSE)
+```
+
+```{r}
+install.packages("lattice")
+install.packages("vegan")
+install.packages("magrittr")
+install.packages("vegan")
+install.packages("ggplot2")
+install.packages("RColorBrewer")
+install.packages("scales")
+install.packages("ggplot2")
+install.packages("permute")
+install.packages("lintr")
+library("lattice")
+library("RColorBrewer")
+library("scales")
+library("colorspace")
+library("ggplot2")
+library("magrittr")
+library("permute")
+library("vegan")
+library("ggplot2")
+library("lintr")
+```
+
+```{r}
+#check script layout
+lintr::lint("exon_R.Rmd")
+```
+
+```{r}
+rm(list = ls())
+
+#read and attach data
+exon <- read.csv("140519_subunit_use_sum.csv", header = TRUE) 
+str(exon) #check it has loaded in properly
+attach(exon)  #attach the data columns
+
+#create exon sum variables - based off sum
+totals_queen <- colSums(exon[which(exon$Caste == "queen"), 3:12])
+totals_worker <- colSums(exon[which(exon$Caste == "worker"), 3:12])
+
+#create data frame
+totals_by_caste <- data.frame(Subunits = rep(as.character(names(exon[, 3:12]))), 
+                              Caste = rep(c("worker", "queen"), each = 10), Count = c(totals_worker, totals_queen))
+
+#plot data
+ggplot(data = totals_by_caste, aes(x = Subunits, y = Count)) +
+  geom_bar(stat = "identity", fill = "steelblue", colour = "black") + theme_bw() + theme(axis.text.x = element_text(angle = -90, hjust = 0, face = "italic")) + facet_grid(rows = vars(Caste))
+```
+
+
+```{r}
+#read and attach data
+exon <- read.csv("030619_variation_all.csv", header = TRUE) 
+str(exon) #check it has loaded in properly
+attach(exon)  #attach the data columns
+colnames(exon)[1] <- "Treatment"
+
+
+#create exon sum variables - based off sum
+clo_queen1 <- log(colSums(exon[which(exon$Caste == "queens" & exon$Treatment=="CLO" & exon$Individual == "1"), 4:length(exon)])+1)
+clo_queen2 <- log(colSums(exon[which(exon$Caste == "queens" & exon$Treatment=="CLO" & exon$Individual == "2"), 4:length(exon)])+1)
+clo_queen3 <- log(colSums(exon[which(exon$Caste == "queens" & exon$Treatment=="CLO" & exon$Individual == "3"), 4:length(exon)])+1)
+clo_queen4 <- log(colSums(exon[which(exon$Caste == "queens" & exon$Treatment=="CLO" & exon$Individual == "4"), 4:length(exon)])+1)
+
+clo_worker1 <- log(colSums(exon[which(exon$Caste == "workers"& exon$Treatment=="CLO" & exon$Individual == "1"), 4:length(exon)])+1)
+clo_worker2 <- log(colSums(exon[which(exon$Caste == "workers"& exon$Treatment=="CLO" & exon$Individual == "2"), 4:length(exon)])+1)
+clo_worker3 <- log(colSums(exon[which(exon$Caste == "workers"& exon$Treatment=="CLO" & exon$Individual == "3"), 4:length(exon)])+1)
+clo_worker4 <- log(colSums(exon[which(exon$Caste == "workers"& exon$Treatment=="CLO" & exon$Individual == "4"), 4:length(exon)])+1)
+
+
+##controls
+con_queen1 <- log(colSums(exon[which(exon$Caste == "queens" & exon$Treatment=="CON" & exon$Individual == "1"), 4:length(exon)])+1)
+con_queen2 <- log(colSums(exon[which(exon$Caste == "queens" & exon$Treatment=="CON" & exon$Individual == "2"), 4:length(exon)])+1)
+con_queen3 <- log(colSums(exon[which(exon$Caste == "queens" & exon$Treatment=="CON" & exon$Individual == "3"), 4:length(exon)])+1)
+con_queen4 <- log(colSums(exon[which(exon$Caste == "queens" & exon$Treatment=="CON" & exon$Individual == "4"), 4:length(exon)])+1)
+
+con_worker1 <- log(colSums(exon[which(exon$Caste == "workers"& exon$Treatment=="CON" & exon$Individual == "1"), 4:length(exon)])+1)
+con_worker2 <- log(colSums(exon[which(exon$Caste == "workers"& exon$Treatment=="CON" & exon$Individual == "2"), 4:length(exon)])+1)
+con_worker3 <- log(colSums(exon[which(exon$Caste == "workers"& exon$Treatment=="CON" & exon$Individual == "3"), 4:length(exon)])+1)
+con_worker4 <- log(colSums(exon[which(exon$Caste == "workers"& exon$Treatment=="CON" & exon$Individual == "4"), 4:length(exon)])+1)
+
+
+####imidacloprid
+imi_queen1 <- log(colSums(exon[which(exon$Caste == "queens" & exon$Treatment=="IMI" & exon$Individual == "1"), 4:length(exon)])+1)
+imi_queen2 <- log(colSums(exon[which(exon$Caste == "queens" & exon$Treatment=="IMI" & exon$Individual == "2"), 4:length(exon)])+1)
+imi_queen3 <- log(colSums(exon[which(exon$Caste == "queens" & exon$Treatment=="IMI" & exon$Individual == "3"), 4:length(exon)])+1)
+imi_queen4 <- log(colSums(exon[which(exon$Caste == "queens" & exon$Treatment=="IMI" & exon$Individual == "4"), 4:length(exon)])+1)
+
+imi_worker1 <- log(colSums(exon[which(exon$Caste == "workers"& exon$Treatment=="IMI" & exon$Individual == "1"), 4:length(exon)])+1)
+imi_worker2 <- log(colSums(exon[which(exon$Caste == "workers"& exon$Treatment=="IMI" & exon$Individual == "2"), 4:length(exon)])+1)
+imi_worker3 <- log(colSums(exon[which(exon$Caste == "workers"& exon$Treatment=="IMI" & exon$Individual == "3"), 4:length(exon)])+1)
+imi_worker4 <- log(colSums(exon[which(exon$Caste == "workers"& exon$Treatment=="IMI" & exon$Individual == "4"), 4:length(exon)])+1)
+
+#create data frame
+totals_by_caste <- data.frame(Subunits = rep(as.character(names(exon[, 4:length(exon)])), 
+                                             times = 24), 
+                              Treatment = rep(c("CLO", "CON", "IMI"), each = 80), 
+                              Caste = rep(c("workers", "queens"), each = 40), 
+                              Count = c(clo_worker1, clo_worker2, clo_worker3, clo_worker4,
+                                        con_worker1, con_worker2, con_worker3, con_worker4,
+                                        imi_worker1, imi_worker2, imi_worker3, imi_worker4,
+                                        clo_queen1, clo_queen2, clo_queen3, clo_queen4,
+                                        con_queen1, con_queen2, con_queen3, con_queen4,
+                                        imi_queen1, imi_queen2, imi_queen3, imi_queen4))
+
+#plot data
+p <- ggplot(totals_by_caste, aes(x = Subunits, y = Count, fill = Caste)) +
+  geom_boxplot() + theme_bw() + theme(axis.text.x = element_text(angle = -90, hjust = 0, face = "italic")) + facet_grid(rows = vars(Treatment))
+
+p<- p + geom_dotplot(binaxis='y', stackdir='center',
+                 position=position_dodge(1))
+print(p + ggtitle("NaChR Receptor Usage in Bombus Terrestris"))
+```
+
+
+
+```{r}
+#read and attach data
+exon <- read.csv("030619_variation_all.csv", header = TRUE) 
+str(exon) #check it has loaded in properly
+attach(exon)  #attach the data columns
+colnames(exon)[1] <- "Treatment"
+##controls
+con_queen1 <- log(colSums(exon[which(exon$Caste == "queens" & exon$Treatment=="CON" & exon$Individual == "1"), 4:length(exon)])+1)
+con_queen2 <- log(colSums(exon[which(exon$Caste == "queens" & exon$Treatment=="CON" & exon$Individual == "2"), 4:length(exon)])+1)
+con_queen3 <- log(colSums(exon[which(exon$Caste == "queens" & exon$Treatment=="CON" & exon$Individual == "3"), 4:length(exon)])+1)
+con_queen4 <- log(colSums(exon[which(exon$Caste == "queens" & exon$Treatment=="CON" & exon$Individual == "4"), 4:length(exon)])+1)
+
+con_worker1 <- log(colSums(exon[which(exon$Caste == "workers"& exon$Treatment=="CON" & exon$Individual == "1"), 4:length(exon)])+1)
+con_worker2 <- log(colSums(exon[which(exon$Caste == "workers"& exon$Treatment=="CON" & exon$Individual == "2"), 4:length(exon)])+1)
+con_worker3 <- log(colSums(exon[which(exon$Caste == "workers"& exon$Treatment=="CON" & exon$Individual == "3"), 4:length(exon)])+1)
+con_worker4 <- log(colSums(exon[which(exon$Caste == "workers"& exon$Treatment=="CON" & exon$Individual == "4"), 4:length(exon)])+1)
+
+
+#create data frame
+totals_by_caste <- data.frame(Subunits = rep(as.character(names(exon[, 4:length(exon)])), 
+                                             times = 2), 
+                              Treatment = rep(c("CON"), each = 80), 
+                              Caste = rep(c("workers", "queens"), each = 40), 
+                              Count = c(con_worker1, con_worker2, con_worker3, con_worker4, con_queen1, con_queen2, con_queen3, con_queen4))
+
+#plot data
+p <- ggplot(totals_by_caste, aes(x = Subunits, y = Count, fill = Caste)) +
+  geom_boxplot() + theme_bw() + theme(axis.text.x = element_text(angle = -90, hjust = 0, face = "italic")) + ylab("RNA Exon Read Counts (/log)")+ facet_grid(rows = vars(Treatment))
+
+p<- p + geom_dotplot(binaxis='y', stackdir='center',               position=position_dodge(1))
+
+
+print(p + ggtitle("NaChR Receptor Usage between Castes in Bombus Terrestris"))
+
+
+```
+
+```{r}
+rm(list = ls())
+
+#read and attach data
+exon_num <- read.csv("130519_exon_per_subunit.csv", header = TRUE) 
+str(exon_num) #check it has loaded in properly
+attach(exon_num)  #attach the data columns
+
+#plot number of exons per subunit
+ggplot(data = exon, aes(x = Subunit, y = Exons)) + geom_bar(stat = "identity", fill = "orange", colour = "black")
+
+```
+
+```{r}
+rm(list = ls())
+
+#read and attach data
+variation <- read.csv("140519_variation.csv", header = TRUE) 
+str(variation) #check it has loaded in properly
+attach(variation)  #attach the data columns
+colnames(variation)
+
+#plot read count variation per individual
+plot(Counts~ï..ID, col = "Red", xlab = "Individual", 
+     ylab = "Number of Read Counts", main = "Read Count Variation per Individual")
+
+
+```
+```{r}
+av <- read.csv("240519_variation_treatments.csv", header = TRUE) 
+str(av) #check it has loaded in properly
+attach(av)  
+
+ggplot(av, aes(x = Caste, y = Counts, fill = Caste)) + geom_boxplot() + guides(fill=FALSE) + theme_bw() + theme(axis.text.x = element_text(angle = -90, hjust = 0, face = "italic")) + facet_grid(rows = vars(ï..Treatment))
+
+#plot(Counts~ID + ï..Treatment, col = "Red", xlab = "Individual", 
+     #ylab = "Number of Read Counts", main = "Read Count Variation per Individual")
+
+```
+
+
+
+
+```{r}
+
+#read and attach data
+exon <- read.csv(i, header = TRUE) 
+str(exon) #check it has loaded in properly
+attach(exon)  #attach the data columns
+
+#create exon sum variables - based off sum
+control_queen <- colSums(exon[which(exon$Treatment == "CON" & exon$Caste == "queens"), 4:length(exon)])
+control_worker <- colSums(exon[which(exon$Treatment == "CON" & exon$Caste == "workers"), 4:length(exon)])
+clo_queen <- colSums(exon[which(exon$Treatment == "CLO" & exon$Caste == "queens"), 4:length(exon)])
+clo_worker <- colSums(exon[which(exon$Treatment == "CLO" & exon$Caste == "workers"), 4:length(exon)])
+imid_queen <- colSums(exon[which(exon$Treatment == "IMI" & exon$Caste == "queens"), 4:length(exon)])
+imid_worker <- colSums(exon[which(exon$Treatment == "IMI" & exon$Caste == "workers"), 4:length(exon)])
+
+#create data frame
+totals_by_caste <- data.frame(Subunits = rep(as.character(names(exon[, 4:12])), times = 6), 
+                              Treatment = rep(c("CLO", "CON", "IMI"), each = 18), 
+                              Caste = rep(c("workers", "queens"), each = 9),
+                              Count = c(control_worker, control_queen, 
+                              clo_queen, clo_worker, imid_worker, imid_queen))
+
+#plot data
+ggplot(data = totals_by_caste, aes(x = Subunits, y = Count, fill = Caste)) +
+  geom_bar(stat = "identity", position=position_dodge(), colour="black") + theme_bw() + theme(axis.text.x = element_text(angle = -90, hjust = 0, face = "italic")) + facet_grid(rows = vars(Treatment))
+
+
+
+```
+
+
+```{r}
+#list of files for each subunit
+list <- c("alpha2_t.csv", "alpha3_t.csv", "alpha4_t.csv", 
+          "alpha5_t.csv", "alpha6_t.csv", "alpha7_t.csv",
+          "alpha8_t.csv", "alpha9_t.csv", "beta1_t.csv")
+
+#loop through list to creat individual plots
+for (i in list){
+  exon <- read.csv(i, header = TRUE) 
+  str(exon) #check it has loaded in properly
+  attach(exon)  #attach the data columns
+  
+  totals_queen <- colSums(exon[which(exon$Caste == "queen"), 3:length(exon)])
+  totals_worker <- colSums(exon[which(exon$Caste == "worker"), 3:length(exon)])
+  
+  totals_by_caste <- data.frame(Exons = rep(as.character(names(exon[, 3:length(exon)]))), Caste = rep(c("queen", "worker")), Count = c(totals_queen,totals_worker))
+  
+  ggplot(data = totals_by_caste, aes(x = Exons, y = Count)) +
+    geom_bar(stat = "identity", fill = "steelblue", colour = "black") +
+    theme_bw() + theme(axis.text.x = element_text(angle = -90, hjust = 0, face = "italic")) + facet_grid(rows = vars(Caste))
+  
+  pdf(paste("ggplot", i, ".jpeg", sep = ""))
+  dev.off()
+}
+
+```
+
+
+```{r}
+#######Tools########
+
+#list of files to transform - trasform into right format for analysis
+list <- c("alpha_1_exons.csv", "alpha_2_exons.csv", "alpha_3_exons.csv", "alpha_4_exons.csv", "alpha_5_exons.csv", "alpha_6_exons.csv", "alpha_7_exons.csv", "alpha_8_exons.csv", "alpha_9_exons.csv","beta_1_exons.csv")
+for (i in list){
+  rm(list = ls())
+  exon <- read.csv("alpha_8_exons.csv", header = TRUE) 
+  str(exon) #check it has loaded in properly
+  attach(exon)  #attach the data columns
+  exon <- t(exon)
+  colnames(exon) <- exon[1, ]
+  exon <- exon[-1, ]
+  exon<-as.data.frame(exon)
+  write.csv(exon, "t2_alpha_8_exons.csv") 
+  #dev.off()
+}
+```
