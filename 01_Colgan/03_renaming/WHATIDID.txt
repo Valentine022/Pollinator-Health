@@ -1,0 +1,15 @@
+mkdir input
+mkdir results
+
+#soft link files from 01_copying_files to input
+#queen files were identified as they had "sorted" tag whilst worker files had "sam" tag
+
+#worker files were renamed using:
+for f in *.counts; do mv -v "$f" "${f/.sam.bam.sam.counts/_WW.counts}; done
+
+#queen files were renamed using:
+for f in *.counts; do mv -v "$f" "${f/.sorted.bam.sam.counts/_QQ.counts}; done
+
+#copy files to results folder
+cp *_WW* ../results/
+cp *_QQ* ../results/
