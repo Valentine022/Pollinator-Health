@@ -1,0 +1,31 @@
+#make directories
+mkdir input
+mkdir results
+
+#download reference files from ensembl metozoa
+Apis_mellifera.Amel_4.5.44.gtf         
+Apis_mellifera.Amel_4.5.dna.toplevel.fa
+
+#create annotated reference
+hisat2_extract_splice_sites.py -v Apis_mellifera.Amel_4.5.44.gtf > splice_sites.txt
+hisat2_extract_exons.py -v Apis_mellifera.Amel_4.5.44.gtf > exons.txt
+hisat2-build Apis_mellifera.Amel_4.5.dna.toplevel.fa --ss splice_sites.txt --exon exons.txt Apis.hisat2
+
+# copy files into directory
+cp ../../02_quality_check/*.fastq .
+
+touch names.txt
+ls *.fastq | cut -d '_' -f 1 | sort > names.txt
+
+qsub align.sh
+
+##job script
+#!/bin/sh
+#$ -cwd           # Set the working directory for the job to the current directory
+#$ -pe smp 4      # Request 1 core
+#$ -l h_rt=24:0:0 # Request 24 hour runtime
+#$ -l h_vmem=4G   # Request 1GB RAM
+
+module load parallel
+export PATH="$PATH:/data/home/bt18612/bin/hisat2-2.1.0/"
+cat names2.txt | parallel -t "hisat2 -x Apis.hisat2 {}.fastq > {}.sam"
