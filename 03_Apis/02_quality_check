@@ -1,0 +1,23 @@
+#make directories
+mkdir input
+mkdir results
+
+#soft link fastq files from 01_downloading_files
+ln -s ../../01_downloading_files/results/*.fastq .
+
+#use fastqc to check qualities
+qsub fastqc.sh
+#!/bin/sh
+#$ -cwd           # Set the working directory for the job to the current directory
+#$ -pe smp 4      # Request 1 core
+#$ -l h_rt=24:0:0 # Request 24 hour runtime
+#$ -l h_vmem=4G   # Request 1GB RAM
+
+module load fastqc
+for f in *.fastq; do fastqc $f; done
+
+#move files to results
+mv *.html ../results/
+
+
+
