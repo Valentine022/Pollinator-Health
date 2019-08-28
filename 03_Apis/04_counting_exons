@@ -33,3 +33,5 @@ pip install HTSeq==0.6.0
 pip install numpy
 
 ls *.sam | parallel -v python DEXSeq_1.26.0/inst/python_scripts/dexseq_count.py -s reverse Apis_mellifera.Amel_4.5.44.gtf.gff {} ../results/{}.counts
+
+#files were the renamed manually
