@@ -8,34 +8,45 @@
 bedtoools subtract proteins.txt blastlocations.txt > ../results/subtracted areas
 
 module load nano
-module load bedtools intersect
+module load bedtools
 mkdir input
 mkdir results
 ### @input ####
 300419_hits.txt #file dowloaded from NCBI Blast hits
 #use Proteins.pynb tool to extract protein locations from hit table.
+
 300419_proteins.txt #protein locations table.
-300419_protein_corrected.txt #from previous file - just kept scaffold
-column and coordinates.
+#open previous file in excel and just kept scaffold column and coordinates. save as 
+300419_protein_corrected.txt 
+
+#reorder file into increasing length order / reorder reverse and forward strand in
+#ascending columns
+
 awk '{OFS="\t"; if ($3>$2) {print} else {print $1,$3,$2}}'300419_protein_corrected.txt >
-300419_proteins_corrected.bed #to reorder reverse andOOforward strand in
-ascending
-columns
-dos2unix 300419_proteins_corrected.bed #to convert windows file into unix
-file
+300419_proteins_corrected.bed 
+
+ #to convert windows file into unix file
+dos2unix 300419_proteins_corrected.bed
+
+#make sure no wierd text markers that will impair bedtools from reading the file
 vim 300419_proteins_corrected.bed
 %s/^M/ #use vim to remove '^M' (ctrl V + shift M to get right format)
 
+#same process for hits.txt & filter hits by 10e-10 e-value
 300419_blast.txt #contains just blast hits, generated using python tool
-300419_filtered2.txt #file contains just scaffold,identity and positions
-awk '{OFS="\t"; if ($2>55) {print}}' 300419_filtered2.txt
->300419_50_filtered.txt #to filter positions with over 55% identity
- awk '{OFS="\t"; if ($4>$3){print $1,$3,$4} else {print $1,$4,$3}}'
-300419_50_filtered.txt > 300419_corrected.bed #ro reorder columns
-dos2unix 300419_corrected.bed #to convert windows file to UNIX
+
+#manualy extract columns needed for analysis; scaffold,identity and positions and save as
+300419_hits_corrected.txt
+
+#filter file to obtain good quality mapping reads
+awk '{OFS="\t"; if ($4>10e-10) {print}}' 300419_hits_corrected.txt > 300419_filtered.txt
+
+awk '{OFS="\t"; if ($3>$2){print $1,$2,$3} else {print
+$1,$3,$3}}' 300419_filtered.txt > 300419_corrected_filtered_hits.bed 
+dos2unix 300419_corrected_filtered_hits.bed  #to convert windows file to UNIX
 vim 300419_corrected.bed
 %s/^M/ #in vim to remove ^M
 
-bedtools subtract -f 0.5 -a 300419_proteins_corrected.bed -b
-300419_corrected.bed > ../results/300419_subtracted_areas.bed #bedtools
-subract with only >50% overlap
+#run bedtools subtract with only >50% overlap
+bedtools subtract -f 0.5 -a 300419_corrected_filtered_hits.bed -b 300419_proteins_corrected.bed > ../results/300419_subtracted_areas.bed
+
