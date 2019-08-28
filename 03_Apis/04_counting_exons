@@ -1,0 +1,18 @@
+mkdir input
+mkdir results
+
+cd input
+cp ../../04_hisat2/input/*.sam .
+cp ../../04_hisat2.input/Apis_mellifera.Amel_4.5.44.gtf .
+
+module load python/2.7.15
+virtualenv --include-lib htseq3
+source htseq3/bin/activate
+pip install HTSeq==0.6.0
+pip install numpy
+
+#annotate reference
+python DEXSeq_1.26.0/inst/python_scripts/dexseq_prepare_annotation.py
+Apis_mellifera.Amel_4.5.44.gtf Apis_mellifera.Amel_4.5.44.gtf.gff
+
+qsub counting_exons.sh
