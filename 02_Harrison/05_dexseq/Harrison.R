@@ -44,7 +44,7 @@ dxd <- estimateDispersions(dxd)
 dxd <- testForDEU(dxd)
 
 #estimate fold changes in exon usage between castes
-dxd <- estimateExonFoldChanges(dxd, fitExpToVar = "Caste")
+dxd <- estimateExonFoldChanges(dxd, fitExpToVar = "Development")
 
 #list of genes we are interested in :
 genes <- c("LOC100647624", "LOC100647301",  "LOC100647350", "LOC100645032", "LOC100648987", "LOC100649515", "LOC100643274", "LOC100649796", "LOC100643282", "LOC100649612")
@@ -93,3 +93,31 @@ for (gene in genes) {
              norCounts = TRUE, displayTranscripts = TRUE, legend = TRUE, 
              cex.axis = 1.2, cex = 1.3, lwd = 2)
 }
+
+
+#r-log transformation of DEXSeq object
+rld <- rlog(dxd)
+#rld2 <- vst(dxd)
+assay_rld <- assay(rld)
+
+#find the indexes of the four genes we are interested in in assay_rld, so we can use them to plot the heatmap
+patterns <-  grep("LOC100647624+|LOC100647301+|LOC100647350+|LOC100645032+|LOC100648987+|LOC100649515+|LOC100643274+|LOC100649796+|LOC100643282+|LOC100649612+", rownames(assay_rld), perl=TRUE, value=TRUE)
+genes_indexes <- c()
+for(pattern in patterns){
+  Indx <- which(rownames(assay_rld) == pattern)
+  genes_indexes <- append(genes_indexes, Indx)
+}
+names_for_rld <- colData(rld)$SampleID
+colnames(assay_rld) <- names_for_rld
+
+#save PCA plots in a pdf file
+pdf(paste("plot_PCA_2208192.pdf", sep = ""), paper='a4r', width = 10, height = 10)
+plt1 <- DESeq2::plotPCA(rld, intgroup = "Development", ntop = genes_indexes, returnData = TRUE)
+print(plt1)
+dev.off()
+
+pdf(paste("plot_PCA3.pdf", sep = ""), paper='a4r', width = 10, height = 10)
+DESeq2::plotPCA(rld, intgroup = "Development", ntop = genes_indexes, returnData = TRUE)
+print(plt1)
+str(plt1)
+
