@@ -5,6 +5,7 @@ cd input
 cp ../../04_hisat2/input/*.sam .
 cp ../../04_hisat2.input/Apis_mellifera.Amel_4.5.44.gtf .
 
+#create virtual environment for installing HTSeq
 module load python/2.7.15
 virtualenv --include-lib htseq3
 source htseq3/bin/activate
@@ -16,3 +17,19 @@ python DEXSeq_1.26.0/inst/python_scripts/dexseq_prepare_annotation.py
 Apis_mellifera.Amel_4.5.44.gtf Apis_mellifera.Amel_4.5.44.gtf.gff
 
 qsub counting_exons.sh
+
+##job script for counting_exons.sh
+#!/bin/bash
+#$ -cwd
+#$ -pe smp 4
+#$ -l h_rt=8:0:0
+#$ -l h_vmem=4G
+
+module load parallel
+module load python/2.7.15
+virtualenv --include-lib htseq3
+source htseq3/bin/activate
+pip install HTSeq==0.6.0
+pip install numpy
+
+ls *.sam | parallel -v python DEXSeq_1.26.0/inst/python_scripts/dexseq_count.py -s reverse Apis_mellifera.Amel_4.5.44.gtf.gff {} ../results/{}.counts
