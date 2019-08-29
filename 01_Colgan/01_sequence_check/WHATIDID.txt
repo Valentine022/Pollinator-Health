@@ -1,6 +1,6 @@
 # download hits from blast query
 # create python loop to separate proteins from hits, using locations
-# use python script to filter out low quality alignments (using E value 10^10)
+# use python script to filter out low quality alignments (using E value 10^-10)
 # dos2windows on files to make sure in correct format
 # use vim to check \\t annotations
 
