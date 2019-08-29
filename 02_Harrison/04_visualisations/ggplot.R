@@ -76,8 +76,11 @@ totals_by_caste <- data.frame(Subunits = rep(as.character(names(exon[, 5:length(
                                         C2_MaleLarvae, C3_MaleLarvae, 
                                         c1_MalePupae, C2_MalePupae, C3_MalePupae))
 
+
 #plot line graph of overall expression of subunit use across life stages, using mean, upper and lower counts for wisker boxplots
 
+
+#####Figure 4
 # create a vector for each subunit
 subunit_vec <- totals_by_caste$Subunits
 
@@ -170,7 +173,7 @@ print(p + ggtitle("Overall Subunit Expression in Different Life Stages in Bombus
 
 
 #plot boxplots of subunit expression at each life stage
-
+##Figure 5
 #plot data
 p <- ggplot(totals_by_caste, aes(x = Subunits, y = Count, fill = Development)) +
   geom_boxplot(width=1) + theme_bw() + theme(axis.text.x = element_text(angle = -90, hjust = 0, face = "italic")) 
@@ -182,5 +185,9 @@ p <- p + scale_fill_manual(values=c("black", "white", "skyblue", "limegreen", "p
                                     "brown", "electricblue"))
 
 print(p + ggtitle("nAChR Subunit Usage in Different Life Stages in Bombus Terrestris"))
+
+#test for significance
+model2 <- glm(totals_by_caste$Count ~ totals_by_caste$Subunits*totals_by_caste$Development, family = "quasipoisson", data = exon)
+summary(model2)
 
 
